@@ -1,32 +1,67 @@
+'use client';
+
 import Image from 'next/image';
 import React from 'react';
 import Button from '../widgets/button/Button';
 import Input from '../widgets/input/Input';
 import Review from './Review';
 import ListProduct from './ListProduct';
-import { Product } from '@prisma/client';
 import { formatCurrency } from '@/utils/helper';
+import { FullProduct } from '@/models/product';
 
 interface ProductDetailProps {
-    product: Product;
+    product: FullProduct | null;
 }
 
 function ProductDetail({ product }: ProductDetailProps) {
+    const [imgSelect, setImgSelect] = React.useState(1);
+
     return (
         <>
             <div className='p-4 bg-slate-50 flex flex-row'>
-                <div className='inline-block'>
-                    <Image
-                        src={'/images/ava-plus-la-y68-190722-051129-600x600.jpeg'}
-                        alt='Image'
-                        width={500}
-                        height={500}
-                        className='mr-4'
-                    />
+                <div className='flex flex-col '>
+                    <div style={{ height: '500px' }} className='mb-4'>
+                        <Image
+                            src={
+                                product?.attachments[imgSelect]?.path ??
+                                'https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png'
+                            }
+                            alt='Image'
+                            className='mr-4 rounded-md'
+                            width={400}
+                            height={400}
+                            quality={100}
+                            style={{ width: '500px', height: '500px', objectFit: 'contain' }}
+                        />
+                    </div>
+                    <div className='flex flex-row items-center justify-center mb-4'>
+                        {product?.attachments?.map((attachment, index) => {
+                            return (
+                                <Image
+                                    onClick={() => setImgSelect(index)}
+                                    key={index}
+                                    src={
+                                        attachment?.path ??
+                                        'https://upload.wikimedia.org/wikipedia/commons/d/d1/Image_not_available.png'
+                                    }
+                                    alt='Image'
+                                    width={80}
+                                    height={80}
+                                    quality={100}
+                                    className='mr-4 rounded-md cursor-pointer'
+                                    style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        objectFit: 'cover',
+                                    }}
+                                />
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div className='flex-1 ml-8'>
-                    <h2 className='font-semibold text-2xl tracking-wider '>{product.name}</h2>
+                    <h2 className='font-semibold text-2xl tracking-wider '>{product?.name}</h2>
                     <div className='flex flex-row text-lg my-2'>
                         <span className='text-amber-600 font-bold text-base mr-2 border-amber-600 border-b'>
                             4.5
@@ -36,7 +71,7 @@ function ProductDetail({ product }: ProductDetailProps) {
                             <i className='bi bi-star-fill'></i>
                             <i className='bi bi-star-fill'></i>
                             <i className='bi bi-star-fill'></i>
-                            <i className='bi bi-star-fill'></i>
+                            <i className='bi bi-star'></i>
                         </div>
                         <span className='mx-4 font-sans text-gray-300 text-2xl relative -top-1'>
                             |
@@ -51,19 +86,22 @@ function ProductDetail({ product }: ProductDetailProps) {
                             |
                         </span>
                         <p className='font-normal text-lg text-gray-500'>
-                            <span className='text-black font-semibold text-xl mr-2'>22k</span>
+                            <span className='text-black font-semibold text-xl mr-2'>
+                                {product?.sold}
+                            </span>
                             Đã bán
                         </p>
                     </div>
                     <div className='p-6 flex flex-row bg-gray-100 items-center'>
                         <div className='line-through text-gray-500 text-lg mr-6'>
-                            {formatCurrency(product?.price * 1.2)}
+                            {product?.price != null &&
+                                formatCurrency(product?.price * (1 + product?.sale))}
                         </div>
                         <div className='text-amber-600 text-3xl font-semibold mr-6'>
-                            {formatCurrency(product?.price)}
+                            {formatCurrency(product?.price || 0)}
                         </div>
                         <div className='inline-block bg-amber-500 text-white text-sm rounded-sm uppercase font-bold text-center px-1 py-0'>
-                            47% giảm
+                            {product?.sale != null && `${product?.sale * 100}% giảm`}
                         </div>
                     </div>
                     <div className='flex flex-row mt-12 items-center'>
@@ -75,7 +113,7 @@ function ProductDetail({ product }: ProductDetailProps) {
                             defaultValue='1'
                         />
                         <Button className=' bg-white text-base px-4 mr-6'>+</Button>
-                        <div className='text-gray-600'>121212 sản phâm có sẵn</div>
+                        <div className='text-gray-600'>{product?.quantity} sản phâm có sẵn</div>
                     </div>
                     <div className='flex flex-row items-center mt-12'>
                         <Button className='border-amber-600 px-4 py-3 font-normal mr-8 flex flex-row items-center text-amber-800 bg-amber-100 hover:bg-amber-50'>
