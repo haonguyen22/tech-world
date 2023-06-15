@@ -4,8 +4,14 @@ import Button from '../widgets/button/Button';
 import Input from '../widgets/input/Input';
 import Review from './Review';
 import ListProduct from './ListProduct';
+import { Product } from '@prisma/client';
+import { formatCurrency } from '@/utils/helper';
 
-function ProductDetail() {
+interface ProductDetailProps {
+    product: Product;
+}
+
+function ProductDetail({ product }: ProductDetailProps) {
     return (
         <>
             <div className='p-4 bg-slate-50 flex flex-row'>
@@ -20,9 +26,7 @@ function ProductDetail() {
                 </div>
 
                 <div className='flex-1 ml-8'>
-                    <h2 className='font-semibold text-2xl tracking-wider '>
-                        Pin sạc dự phòng 7.500 mAh AVA+ LA Y68
-                    </h2>
+                    <h2 className='font-semibold text-2xl tracking-wider '>{product.name}</h2>
                     <div className='flex flex-row text-lg my-2'>
                         <span className='text-amber-600 font-bold text-base mr-2 border-amber-600 border-b'>
                             4.5
@@ -52,8 +56,12 @@ function ProductDetail() {
                         </p>
                     </div>
                     <div className='p-6 flex flex-row bg-gray-100 items-center'>
-                        <div className='line-through text-gray-500 text-lg mr-6'>₫75.000</div>
-                        <div className='text-amber-600 text-3xl font-semibold mr-6'>₫40.000</div>
+                        <div className='line-through text-gray-500 text-lg mr-6'>
+                            {formatCurrency(product?.price * 1.2)}
+                        </div>
+                        <div className='text-amber-600 text-3xl font-semibold mr-6'>
+                            {formatCurrency(product?.price)}
+                        </div>
                         <div className='inline-block bg-amber-500 text-white text-sm rounded-sm uppercase font-bold text-center px-1 py-0'>
                             47% giảm
                         </div>
@@ -86,12 +94,7 @@ function ProductDetail() {
                 <div className='w-full mb-5 bg-gray-100 uppercase text-xl tracking-wider font-medium px-2 py-4 '>
                     Mô tả sản phẩm
                 </div>
-                <ul className='px-6 pb-6'>
-                    <li>❄️mã này hàng lên bao nhiêu vẫn không đủ cấp í </li>
-                    <li>❄️Năm nay xưởng vẫn lên mẫu phục vụ mọi người nhé.</li>
-                    <li>❄️Diện team, mặc đôi ưng xỉu đó ạ</li>
-                    <li>❄️Freesize: Phom 38-65kg mặc đẹp nha!</li>
-                </ul>
+                <ul className='px-6 pb-6'>{product?.description}</ul>
             </div>
 
             {/* Review */}

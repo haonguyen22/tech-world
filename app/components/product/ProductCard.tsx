@@ -3,14 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import Button from '../widgets/button/Button';
 
 export default function ProductCard() {
     return (
         <div className='pb-6 w-full'>
             <Link
-                as={'image'}
-                href={'/product/1234'}
+                // as={'image'}
+                href={'/product/647c6fe2cd80abeff75f55c4'}
                 className='block hover:-translate-y-0.5 ease-out transition duration-30'
             >
                 <div className='max-w-md mx-auto'>
@@ -41,9 +40,9 @@ export default function ProductCard() {
                                 <i className='bi bi-star-fill text-amber-500'></i>
                                 <div className='text-md font-normal'>512</div>
                             </div>
-                            <Button className='w-full mt-4 text-white bg-amber-600 hover:bg-amber-700 font-medium rounded-lg py-2'>
+                            {/* <Button className='w-full mt-4 text-white bg-amber-600 hover:bg-amber-700 font-medium rounded-lg py-2'>
                                 Thêm vào giỏ hàng
-                            </Button>
+                            </Button> */}
                         </div>
                     </div>
                 </div>

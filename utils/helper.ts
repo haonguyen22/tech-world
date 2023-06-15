@@ -38,3 +38,7 @@ export function convertBreadcrumb(s: string) {
         .replace(/ae/g, 'ä')
         .replace(/ue/g, 'ü');
 }
+
+export function formatCurrency (number: number) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number);
+}
