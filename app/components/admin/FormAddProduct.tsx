@@ -1,13 +1,14 @@
 'use client';
-import { ProductSelect } from '@/models/product';
+import { FullProduct } from '@/models/product';
 import { AttachmentType, Brand, Category } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Time from './Time';
 import { AttachmentInput } from '@/models/attachment';
+import Link from 'next/link';
 
 interface Props {
-    product?: ProductSelect;
+    product?: FullProduct;
     setShowing?: React.Dispatch<React.SetStateAction<boolean>>;
     submit?: (data: any, attachments: AttachmentInput[]) => void;
 }
@@ -18,13 +19,13 @@ export default function FormAddProduct({ product, setShowing, submit }: Props) {
     const [attachments, setAttachments] = useState<AttachmentInput[]>([]);
     useEffect(() => {
         const fetchBrand = async () => {
-            const res = await fetch('http://localhost:3000/api/brand');
-            const data = await res.json();
+            const res = await fetch('/api/brand');
+            const { data } = await res.json();
             setBrands(data);
         };
         const fetchCategory = async () => {
-            const res = await fetch('http://localhost:3000/api/category');
-            const data = await res.json();
+            const res = await fetch('/api/category');
+            const { data } = await res.json();
             setCategories(data);
         };
         fetchBrand();
@@ -222,9 +223,12 @@ export default function FormAddProduct({ product, setShowing, submit }: Props) {
                             {product ? 'Lưu' : 'Thêm sản phẩm'}
                         </button>
                         {product && (
-                            <button className='bg-white rounded-md text-black hover:bg-gray-100 px-2 py-2 ms-5 outline outline-1 outline-gray-500'>
+                            <Link
+                                href='/admin/product'
+                                className='bg-white rounded-md text-black hover:bg-gray-100 px-2 py-2 ms-5 outline outline-1 outline-gray-500'
+                            >
                                 Hủy
-                            </button>
+                            </Link>
                         )}
                     </div>
 

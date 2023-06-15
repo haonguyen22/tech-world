@@ -3,13 +3,16 @@ import prisma from '../libs/prismadb';
 import { AttachmentInput } from './attachment';
 import { Attachment, Brand, Category, Product } from '@prisma/client';
 
-export type ProductSelect = Product & {
+export type FullProduct = Product & {
     category: Category | null;
     brand: Brand | null;
     attachments: Attachment[];
 };
 
-export async function getProductById(id: string) {
+export const ProductNotFound = new Error('Product not found');
+export const NotEnoughQuantity = new Error('Not enough quantity');
+
+export async function getProduct(id?: string) {
     const product = await prisma.product.findFirst({
         where: {
             id: id,
@@ -23,8 +26,16 @@ export async function getProductById(id: string) {
     return product;
 }
 
-export async function listProducts() {
+export async function listProducts(categorySlug?: string, brandSlug?: string) {
     const products = await prisma.product.findMany({
+        where: {
+            category: {
+                slug: categorySlug != null ? categorySlug : undefined,
+            },
+            brand: {
+                slug: brandSlug != null ? brandSlug : undefined,
+            },
+        },
         include: {
             attachments: true,
             brand: true,
@@ -34,13 +45,24 @@ export async function listProducts() {
     return products;
 }
 
+export async function getCategoryBySlug(categorySlug: string) {
+    const category = await prisma.category.findUnique({
+        where: {
+            slug: categorySlug,
+        },
+    });
+    return category;
+}
+
 export async function createProduct(
     name: string,
     price: number,
     description: string,
+    quantity: number,
     brandId: string,
     categoryId: string,
     attachments: AttachmentInput[],
+    sale?: number,
 ) {
     const newProducts = await prisma.product.create({
         data: {
@@ -48,11 +70,21 @@ export async function createProduct(
             slug: toSlug(name),
             price: price,
             description: description,
-            brandId: brandId,
-            categoryId: categoryId,
+            quantity: quantity,
+            brand: {
+                connect: {
+                    id: brandId,
+                },
+            },
+            category: {
+                connect: {
+                    id: categoryId,
+                },
+            },
             attachments: {
                 create: attachments,
             },
+            sale: sale,
         },
     });
     return newProducts;
@@ -63,9 +95,11 @@ export async function updateProduct(
     name: string,
     price: number,
     description: string,
+    quantity: number,
     brandId: string,
     categoryId: string,
     attachments: AttachmentInput[],
+    sale?: number,
 ) {
     const oldProduct = await prisma.product.findUnique({
         where: {
@@ -77,7 +111,7 @@ export async function updateProduct(
     });
 
     if (!oldProduct) {
-        throw new Error('Product not found');
+        throw ProductNotFound;
     }
 
     const attachmentsToAdd = attachments.filter((attachment) => {
@@ -101,6 +135,7 @@ export async function updateProduct(
             slug: toSlug(name),
             price: price,
             description: description,
+            quantity: quantity,
             brandId: brandId,
             categoryId: categoryId,
             attachments: {
@@ -111,6 +146,7 @@ export async function updateProduct(
                     };
                 }),
             },
+            sale: sale,
         },
     });
 
@@ -118,15 +154,10 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string) {
-    try {
-        await prisma.product.delete({
-            where: {
-                id: id,
-            },
-        });
-        return { status: 'ok', message: 'Product deleted successfully' };
-    } catch (error: any) {
-        console.error(error, 'Error deleting product');
-        throw new Error('Error deleting product');
-    }
+    const product = await prisma.product.delete({
+        where: {
+            id: id,
+        },
+    });
+    return product;
 }

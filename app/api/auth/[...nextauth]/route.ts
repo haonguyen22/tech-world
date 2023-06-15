@@ -4,6 +4,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 
 import prisma from '@/libs/prismadb';
 import { auth } from '@/models/user';
+import { JWT } from 'next-auth/jwt';
 
 export const authOptions: AuthOptions = {
     adapter: PrismaAdapter(prisma),
@@ -20,16 +21,42 @@ export const authOptions: AuthOptions = {
                 }
 
                 const user = await auth(credentials.phone, credentials.password);
-                return user;
+
+                if (!user) {
+                    throw new Error('Invalid Credentials');
+                }
+                return {
+                    id: user.id,
+                    name: user.name,
+                    phone: user.phone,
+                    email: user.email,
+                    role: user.role,
+                    cartId: user.cartId,
+                };
             },
         }),
     ],
     callbacks: {
         async jwt({ token, user }) {
-            return { ...token, ...user };
+            if (user) {
+                return {
+                    ...token,
+                    user: {
+                        id: user.id,
+                        name: user.name,
+                        phone: user.phone,
+                        email: user.email,
+                        role: user.role,
+                        cartId: user.cartId,
+                    },
+                };
+            }
+            return token;
         },
         async session({ session, token, user }) {
-            session.user = token;
+            session.user = token.user;
+            session.iat = token.iat;
+            session.exp = token.exp;
             return session;
         },
     },

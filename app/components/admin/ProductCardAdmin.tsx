@@ -1,11 +1,11 @@
 'use client';
 import { useState } from 'react';
 import DeleteProductModal from './DeleteProductModal';
-import { ProductSelect } from '@/models/product';
+import { FullProduct } from '@/models/product';
 
 interface Props {
     className?: string;
-    product: ProductSelect;
+    product: FullProduct;
 }
 export default function ProductCardAdmin({ className, product }: Props) {
     const [showingDeleteModal, setShowingDeleteModal] = useState(false);
@@ -41,15 +41,15 @@ export default function ProductCardAdmin({ className, product }: Props) {
 
             <div>
                 <span className='font-semibold'>Giá sale: </span>
-                <span>TODO</span>
+                <span>{product.price * (1 - product.sale)}</span>
             </div>
             <div>
                 <span className='font-semibold'>Đã bán: </span>
-                <span>TODO</span>
+                <span>{product.sold}</span>
             </div>
             <div>
                 <span className='font-semibold'>Còn lại: </span>
-                <span>TODO</span>
+                <span>{product.quantity}</span>
             </div>
             <div>
                 <span className='font-semibold'>Đánh giá: </span>
